@@ -38,30 +38,18 @@
             var byteLength = 0;
             buffers.forEach(function(buffer) {
                 byteLength += buffer.byteLength;
-                // TODO(datermine): Figure out if this is necessary.
-                if (buffer.byteLength % 2 != 0) {
-                    // byteLength--;
-                }
             });
+            
             var tmp = new Uint16Array(byteLength);
-
             var lastOffset = 0;
             buffers.forEach(function(buffer) {
                 // BYTES_PER_ELEMENT == 2 for Uint16Array
-                var bufferByteLength = buffer.byteLength;
-                if (bufferByteLength % 2 != 0) {
-                    // NOTE(datermine): Uses to delete, now we use slice.
-                    // delete buffer[bufferByteLength - 1];
-                    buffer = buffer.slice(0, bufferByteLength - 1)
-                    
-                    // NOTE(datermine): Once we slice instead of delete, this is really
-                    // no longer necessary as it's the same as buffer.byteLength
-                    // bufferByteLength -= 1;
+                var reusableByteLength = buffer.byteLength;
+                if (reusableByteLength % 2 != 0) {
+                    buffer = buffer.slice(0, reusableByteLength - 1)
                 }
                 tmp.set(new Uint16Array(buffer), lastOffset);
-                
-                // NOTE(datermine): We could just use buffer.byteLength here.
-                lastOffset += bufferByteLength;
+                lastOffset += reusableByteLength;
             });
 
             var blob = new Blob([tmp.buffer], {
